@@ -1,0 +1,101 @@
+if not game:IsLoaded() then game.Loaded:Wait() end
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local Screen = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+Screen.Name = "Nova_V31_Power"
+Screen.ResetOnSpawn = True
+
+shared.RankedMemory = shared.RankedMemory or {} 
+local UnrankedCooldowns = {} 
+
+local Main = Instance.new("Frame", Screen)
+Main.Size = UDim2.new(0, 420, 0, 45)
+Main.Position = UDim2.new(0.5, -210, 0.05, 0)
+Main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+Main.Active = true
+Main.Draggable = true
+Instance.new("UICorner", Main)
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Color = Color3.fromRGB(0, 200, 255)
+Stroke.Thickness = 2
+
+local CmdInput = Instance.new("TextBox", Main)
+CmdInput.Size = UDim2.new(1, -20, 1, 0)
+CmdInput.Position = UDim2.new(0, 10, 0, 0)
+CmdInput.BackgroundTransparency = 1
+CmdInput.TextColor3 = Color3.new(1,1,1)
+CmdInput.Text = ""
+CmdInput.PlaceholderText = "V31 | UNRANKED LIMIT: 500"
+CmdInput.Font = Enum.Font.Code
+
+local function Log(msg) print("[NOVA V31]: " .. msg) end
+
+local function Process(msg, sender)
+    local args = string.split(string.lower(msg), " ")
+    local cmd = args[1]
+    if not cmd then return end
+    
+    local isMe = (sender == LocalPlayer)
+    local isRanked = shared.RankedMemory[sender.UserId] or isMe
+    
+    if not isRanked and cmd == "/vote" then
+        local lastUsed = UnrankedCooldowns[sender.UserId] or 0
+        if tick() - lastUsed < 10 then 
+            return 
+        end
+        UnrankedCooldowns[sender.UserId] = tick()
+    end
+
+    local voteLimit = 500 
+    if isMe then 
+        voteLimit = 999999 
+    elseif isRanked then 
+        voteLimit = 1000 
+    end
+
+    if cmd == "/vote" then
+        local target = tonumber(args[2]) or 1
+        local amt = math.clamp(tonumber(args[3]) or 1, 1, voteLimit)
+        
+        for i=1, amt do 
+            ReplicatedStorage.Voting.AddVote:FireServer(target) 
+        end
+        
+        if not isRanked then 
+            Log(sender.Name .. " (Unranked) used " .. amt .. " votes on M" .. target)
+        end
+    end
+
+    if not isRanked then return end
+    local target = tonumber(args[2]) or 1
+
+    if cmd == "/overload" then
+        for i=1, voteLimit do ReplicatedStorage.Voting.AddVote:FireServer(target) end
+        Log("M" .. target .. " Overloaded by " .. sender.Name)
+    elseif cmd == "/drain" then
+        for i=1, voteLimit do ReplicatedStorage.Voting.RemoveVote:FireServer(target) end
+        Log("M" .. target .. " Drained by " .. sender.Name)
+    elseif cmd == "/armageddon" and isMe then
+        for i=1,3 do for x=1, 400 do ReplicatedStorage.Voting.AddVote:FireServer(i) end end
+        Log("!! ARMAGEDDON !!")
+    elseif cmd == "/rankup" and isMe then
+        local t = args[2] or ""
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Name:lower():sub(1, #t) == t:lower() then
+                shared.RankedMemory[p.UserId] = true
+                Log(p.Name .. " is now RANKED (1000 Limit)")
+            end
+        end
+    elseif cmd == "/unload" and isMe then 
+        Screen:Destroy() 
+    end
+end
+
+CmdInput.FocusLost:Connect(function(e) if e then Process(CmdInput.Text, LocalPlayer) CmdInput.Text = "" end end)
+Players.PlayerAdded:Connect(function(p)
+    p.Chatted:Connect(function(m) Process(m, p) end)
+end)
+for _, p in pairs(Players:GetPlayers()) do p.Chatted:Connect(function(m) Process(m, p) end) end
