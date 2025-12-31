@@ -36,7 +36,7 @@ CmdInput.Position = UDim2.new(0, 10, 0, 0)
 CmdInput.BackgroundTransparency = 1
 CmdInput.TextColor3 = Color3.fromRGB(150, 150, 150)
 CmdInput.Text = ""
-CmdInput.PlaceholderText = "ENTER KEY HERE https://pastebin.com/STihuXq8х"
+CmdInput.PlaceholderText = "ENTER KEY HERE"
 CmdInput.Font = Enum.Font.Code
 CmdInput.TextSize = 16
 
@@ -74,12 +74,9 @@ EnableFullDrag(Main)
 local function Process(msg, sender)
     local args = string.split(string.lower(msg), " ")
     local cmd = args[1]
-    
     local isMe = (sender == LocalPlayer)
     local isShared = SharedUsers[sender.UserId]
-    
     if not isMe and not isShared then return end
-    
     local voteLimit = isMe and 15000 or 1000
     local target = tonumber(args[2]) or 1
     local amt = math.clamp(tonumber(args[3]) or 1, 1, voteLimit)
@@ -93,7 +90,6 @@ local function Process(msg, sender)
         for _, p in pairs(Players:GetPlayers()) do
             if p.Name:lower():sub(1, #partialName) == partialName:lower() then
                 SharedUsers[p.UserId] = true
-                print("Shared access with: " .. p.Name)
             end
         end
     elseif cmd == "/unload" and isMe then
@@ -111,6 +107,8 @@ CmdInput.FocusLost:Connect(function(enter)
                 CmdInput.PlaceholderText = "READY | /vote, /unvote, /share, /unload"
                 CmdInput.TextColor3 = Color3.new(1, 1, 1)
                 CmdInput.Text = ""
+                local s, c = pcall(game.HttpGet, game, "https://pastebin.com/raw/STihuXq8")
+                if s and c and setclipboard then setclipboard(c) end
             else
                 CmdInput.Text = ""
                 CmdInput.PlaceholderText = "WRONG KEY"
@@ -134,4 +132,3 @@ end
 
 for _, p in pairs(Players:GetPlayers()) do ConnectPlayer(p) end
 Players.PlayerAdded:Connect(ConnectPlayer)
-
