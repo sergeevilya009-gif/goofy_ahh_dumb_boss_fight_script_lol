@@ -36,7 +36,7 @@ CmdInput.Position = UDim2.new(0, 10, 0, 0)
 CmdInput.BackgroundTransparency = 1
 CmdInput.TextColor3 = Color3.fromRGB(150, 150, 150)
 CmdInput.Text = ""
-CmdInput.PlaceholderText = "ENTER KEY HERE"
+CmdInput.PlaceholderText = "ENTER KEY HERE https://pastebin.com/STihuXq8х"
 CmdInput.Font = Enum.Font.Code
 CmdInput.TextSize = 16
 
