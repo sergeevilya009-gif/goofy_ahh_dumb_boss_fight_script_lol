@@ -4,9 +4,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
-local success, content = pcall(game.HttpGet, game, "https://pastebin.com/raw/STihuXq8")
-if success and content and setclipboard then 
-    setclipboard(content) 
+if setclipboard then 
+    setclipboard("https://pastebin.com/STihuXq8") 
 end
 
 local IsAuthenticated = false
